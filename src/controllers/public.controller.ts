@@ -130,7 +130,7 @@ export const submitInvestorInterest = async (req: Request, res: Response) => {
       },
     });
 
-    // In a real application, you might want to:
+   
     // 1. Send confirmation email
     // 2. Notify admin team
     // 3. Add to CRM system
