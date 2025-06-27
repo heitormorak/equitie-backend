@@ -1,0 +1,443 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CompanyType {
+  PORTFOLIO
+  PARTNER
+  HOLDING
+}
+
+enum DealType {
+  FACILITATED_DIRECT
+  FACILITATED_INVESTORS
+  ADVISORY
+  SPV
+  PARTNERSHIP
+  EQUITIE
+}
+
+enum InvestorType {
+  INDIVIDUAL
+  COMPANY
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  CLOSED
+}
+
+enum ProjectType {
+  INVESTMENT
+  ADVISORY
+}
+
+model Company {
+  id                    Int      @id @default(autoincrement()) @map("company_id")
+  company_name          String   @unique @map("company_name")
+  company_type          CompanyType @map("company_type")
+  company_description   String?  @map("company_description")
+  country_incorporation String?  @map("country_incorporation")
+  company_sector        String?  @map("company_sector")
+  incorporation_date    DateTime? @map("incorporation_date")
+  portfolio_company_website String? @map("portfolio_company_website")
+  funding_round_stage   String?  @map("funding_round_stage")
+  founding_year         Int?     @map("founding_year")
+  lead_contact_name     String?  @map("lead_contact_name")
+  lead_contact_email    String?  @map("lead_contact_email")
+  last_pitch_deck_path  String?  @map("last_pitch_deck_path")
+  data_room_url         String?  @map("data_room_url")
+  created_at            DateTime @default(now()) @map("created_at")
+  updated_at            DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  deals_as_underlying   Deal[]   @relation("DealUnderlyingCompany")
+  deals_as_holding      Deal[]   @relation("DealHoldingEntity")
+  deal_company_investments DealCompanyInvestment[]
+  investment_snapshots  InvestmentSnapshot[]
+  valuations            Valuation[]
+  documents             Document[]
+  transactions_advisory TransactionAdvisory[]
+  deals_underlying_companies DealsUnderlyingCompanies[]
+
+  @@map("companies")
+}
+
+model Deal {
+  id                        Int      @id @default(autoincrement()) @map("deal_id")
+  deal_name                 String   @map("deal_name")
+  deal_type                 DealType @map("deal_type")
+  underlying_company_id     Int?     @map("underlying_company_id")
+  holding_entity            Int?
+  deal_date                 DateTime? @map("deal_date")
+  entry_valuation           Decimal? @map("entry_valuation")
+  initial_unit_price        Decimal? @map("initial_unit_price")
+  exit_price_per_unit       Decimal? @map("exit_price_per_unit")
+  deal_exited               Boolean  @default(false) @map("deal_exited")
+  gross_capital             Decimal? @map("gross_capital")
+  deal_partner_name         String?  @map("deal_partner_name")
+  deal_currency             String?  @map("deal_currency")
+  initial_net_capital       Decimal? @map("initial_net_capital")
+  structuring_fee_percent   Decimal? @map("structuring_fee_percent")
+  premium_fee_percent       Decimal? @map("premium_fee_percent")
+  performance_fee_partner   Decimal? @map("performance_fee_partner")
+  performance_fee_equitie   Decimal? @map("performance_fee_equitie")
+  annual_management_fee_percent Decimal? @map("annual_management_fee_percent")
+  holding_entity_units      Int?     @map("holding_entity_units")
+  advisory_shares_earned    Int?     @map("advisory_shares_earned")
+  partner_llc_agreement     String?  @map("partner_llc_agreement")
+  member_operating_agreement String? @map("member_operating_agreement")
+  members_side_letter       String?  @map("members_side_letter")
+  partner_side_letter       String?  @map("partner_side_letter")
+  exit_date                 DateTime? @map("exit_date")
+  exit_price_per_underlying_share Decimal? @map("exit_price_per_underlying_share")
+  createdAt                 DateTime @map("createdAt")
+  updatedAt                 DateTime @map("updatedAt")
+  deal_status               String?  @map("deal_status")
+  description               String?
+  partner_performance_fee_percent Decimal? @map("partner_performance_fee_percent")
+  partner_annual_management_fee_percent Decimal? @map("partner_annual_management_fee_percent")
+  partner_management_fee_years Int? @map("partner_management_fee_years")
+  subscription_capital      Decimal? @map("subscription_capital")
+
+  // Relations
+  underlying_company        Company? @relation("DealUnderlyingCompany", fields: [underlying_company_id], references: [id])
+  holding_entity_company    Company? @relation("DealHoldingEntity", fields: [holding_entity], references: [id])
+  transactions              Transaction[]
+  deal_company_investments  DealCompanyInvestment[]
+  investment_snapshots      InvestmentSnapshot[]
+  deal_analytics            DealAnalytics[]
+  documents                 Document[]
+  transaction_secondaries   TransactionSecondary[]
+  transactions_advisory     TransactionAdvisory[]
+  deals_underlying_companies DealsUnderlyingCompanies[]
+
+  @@map("deals")
+}
+
+model Investor {
+  id                    Int      @id @default(autoincrement())
+  full_name             String   @map("full_name")
+  primary_email         String   @unique @map("primary_email")
+  secondary_email       String?  @map("secondary_email")
+  phone                 String?
+  nationality           String?
+  country_of_residence  String?  @map("country_of_residence")
+  birthday              DateTime?
+  address               String?
+  investor_type         InvestorType @map("investor_type")
+  referred_by           String?  @map("referred_by")
+  passport_copy         String?  @map("passport_copy")
+  id_checked            Boolean  @default(false) @map("id_checked")
+  createdAt             DateTime @map("createdAt")
+  updatedAt             DateTime @map("updatedAt")
+  investor_id           String?  @map("investor_id")
+  residence_city        String?  @map("residence_city")
+  marital_status        String?  @map("marital_status")
+  occupation            String?
+  join_date             DateTime? @map("join_date")
+  source_of_wealth      String?  @map("source_of_wealth")
+  expected_income_usd   Decimal? @map("expected_income_usd")
+  liquidity_needs       String?  @map("liquidity_needs")
+  education_background  String?  @map("education_background")
+  languages_spoken      String[] @map("languages_spoken")
+  business_interests    String?  @map("business_interests")
+  usd_bank_account_details String? @map("usd_bank_account_details")
+  decision_independence Boolean? @map("decision_independence")
+
+  // Relations
+  transactions          Transaction[]
+  investment_snapshots  InvestmentSnapshot[]
+  investor_analytics    InvestorAnalytics[]
+  documents             Document[]
+  transaction_secondaries_as_seller TransactionSecondary[] @relation("Seller")
+  transaction_secondaries_as_buyer  TransactionSecondary[] @relation("Buyer")
+  transactions_sub_nominees TransactionSubNominee[]
+
+  @@map("investors")
+}
+
+model Transaction {
+  id                    Int      @id @default(autoincrement()) @map("transaction_id")
+  deal_id               Int      @map("deal_id")
+  investor_id           Int      @map("investor_id")
+  transaction_date      DateTime @map("transaction_date")
+  units                 Int
+  unit_price            Decimal  @map("unit_price")
+  gross_capital         Decimal  @map("gross_capital")
+  initial_net_capital   Decimal? @map("initial_net_capital")
+  admin_fee             Decimal? @map("admin_fee")
+  deal_name             String?  @map("deal_name")
+  management_fee_percent Decimal? @map("management_fee_percent")
+  performance_fee_percent Decimal? @map("performance_fee_percent")
+  structuring_fee_percent Decimal? @map("structuring_fee_percent")
+  premium_fee_percent   Decimal? @map("premium_fee_percent")
+  source_email_id       String?  @map("source_email_id")
+  source_doc_link       String?  @map("source_doc_link")
+  agent_parsed          Boolean  @default(false) @map("agent_parsed")
+  nominee               Boolean  @default(false)
+  term_sheet            String?  @map("term_sheet")
+  operating_agreement   String?  @map("operating_agreement")
+  transfer_due          Decimal? @map("transfer_due")
+  initial_amount_received Decimal? @map("initial_amount_received")
+  full_name             String?  @map("full_name")
+  createdAt             DateTime @map("createdAt")
+  updatedAt             DateTime @map("updatedAt")
+
+  // Relations
+  deal                  Deal     @relation(fields: [deal_id], references: [id], onDelete: Cascade)
+  investor              Investor @relation(fields: [investor_id], references: [id])
+  transaction_secondaries TransactionSecondary[]
+  transactions_sub_nominees TransactionSubNominee[]
+
+  @@map("transactions")
+}
+
+model Valuation {
+  id                    Int      @id @default(autoincrement()) @map("valuation_id")
+  company_id            Int      @map("company_id")
+  description           String?
+  valuation_date        DateTime @map("valuation_date")
+  valuation_post_money  Decimal  @map("valuation_post_money")
+  createdAt             DateTime @map("createdAt")
+  updatedAt             DateTime @map("updatedAt")
+  valuation_pre_money   Decimal  @map("valuation_pre_money")
+  investment_amount     Decimal  @map("investment_amount")
+
+  // Relations
+  company               Company  @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+  @@map("valuations")
+}
+
+model InvestmentSnapshot {
+  snapshot_id           Int      @id @default(autoincrement()) @map("snapshot_id")
+  investor_id           Int      @map("investor_id")
+  deal_id               Int      @map("deal_id")
+  company_id            Int      @map("company_id")
+  snapshot_date         DateTime @default(now()) @map("snapshot_date")
+  total_units           Int      @map("total_units")
+  net_capital           Decimal  @map("net_capital")
+  entry_valuation       Decimal  @map("entry_valuation")
+  last_valuation        Decimal  @map("last_valuation")
+  moic                  Decimal  @map("moic")
+  current_value         Decimal  @map("current_value")
+  profit_percent        Decimal  @map("profit_percent")
+  valuation_source      String   @map("valuation_source")
+  updated_at            DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  investor              Investor @relation(fields: [investor_id], references: [id], onDelete: Cascade)
+  deal                  Deal     @relation(fields: [deal_id], references: [id], onDelete: Cascade)
+  company               Company  @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+  @@unique([investor_id, deal_id, company_id])
+  @@map("investment_snapshots")
+}
+
+model DealCompanyInvestment {
+  id                    Int      @id @default(autoincrement())
+  deal_id               Int      @map("deal_id")
+  company_id            Int      @map("company_id")
+  investment_amount     Decimal  @map("investment_amount")
+  entry_valuation       Decimal  @map("entry_valuation")
+  investment_date       DateTime? @map("investment_date")
+  notes                 String?
+  created_at            DateTime @default(now()) @map("created_at")
+  updated_at            DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  deal                  Deal     @relation(fields: [deal_id], references: [id], onDelete: Cascade)
+  company               Company  @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+  @@unique([deal_id, company_id])
+  @@map("deal_company_investments")
+}
+
+model DealAnalytics {
+  id                    Int      @id @default(autoincrement())
+  deal_id               Int      @map("deal_id")
+  calculation_date      DateTime @default(now()) @map("calculation_date")
+  current_valuation     Decimal? @map("current_valuation")
+  total_invested        Decimal? @map("total_invested")
+  moic                  Decimal? @map("moic")
+  irr                   Decimal? @map("irr")
+  holding_period_days   Int?     @map("holding_period_days")
+  unrealized_gain_loss  Decimal? @map("unrealized_gain_loss")
+  risk_score            Decimal? @map("risk_score")
+  liquidity_score       Decimal? @map("liquidity_score")
+  performance_quartile  Int?     @map("performance_quartile")
+  created_at            DateTime @default(now()) @map("created_at")
+  updated_at            DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  deal                  Deal     @relation(fields: [deal_id], references: [id])
+
+  @@unique([deal_id, calculation_date])
+  @@map("deal_analytics")
+}
+
+model InvestorAnalytics {
+  id                    Int      @id @default(autoincrement())
+  investor_id           Int      @map("investor_id")
+  calculation_date      DateTime @default(now()) @map("calculation_date")
+  total_committed       Decimal  @default(0) @map("total_committed")
+  total_invested        Decimal  @default(0) @map("total_invested")
+  current_portfolio_value Decimal @default(0) @map("current_portfolio_value")
+  realized_returns      Decimal  @default(0) @map("realized_returns")
+  unrealized_returns    Decimal  @default(0) @map("unrealized_returns")
+  portfolio_irr         Decimal  @default(0) @map("portfolio_irr")
+  number_of_investments Int      @default(0) @map("number_of_investments")
+  average_investment_size Decimal @default(0) @map("average_investment_size")
+  investment_diversification_score Decimal @default(0) @map("investment_diversification_score")
+  risk_profile_score    Decimal  @default(0) @map("risk_profile_score")
+  created_at            DateTime @default(now()) @map("created_at")
+  updated_at            DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  investor              Investor @relation(fields: [investor_id], references: [id])
+
+  @@unique([investor_id, calculation_date])
+  @@map("investor_analytics")
+}
+
+model TransactionSecondary {
+  id                    Int      @id @default(autoincrement())
+  deal_name_link        Int      @map("deal_name_link")
+  seller_name           Int      @map("seller_name")
+  subnominee_seller     Int?     @map("subnominee_seller")
+  transaction           Int
+  unit_price            Decimal  @map("unit_price")
+  buyer_name            Int      @map("buyer_name")
+  number_of_unit_sold   Int      @map("number_of_unit_sold")
+  transaction_amount    Decimal  @map("transaction_amount")
+  price_per_unit_sold   Decimal  @map("price_per_unit_sold")
+  secondary_transaction_date DateTime @map("secondary_transaction_date")
+  createdAt             DateTime @map("createdAt")
+  updatedAt             DateTime @map("updatedAt")
+
+  // Relations
+  deal                  Deal     @relation(fields: [deal_name_link], references: [id])
+  seller                Investor @relation("Seller", fields: [seller_name], references: [id])
+  buyer                 Investor @relation("Buyer", fields: [buyer_name], references: [id])
+  original_transaction  Transaction @relation(fields: [transaction], references: [id], onDelete: Cascade)
+
+  @@map("transaction_secondaries")
+}
+
+model TransactionSubNominee {
+  subnominee_id         Int      @id @default(autoincrement()) @map("subnominee_id")
+  sub_nominee_investor_link Int  @map("sub_nominee_investor_link")
+  transaction           Int
+  nominee_name          String?  @map("nominee_name")
+  deal_name             String?  @map("deal_name")
+  gross_capital_nominee Decimal? @map("gross_capital_nominee")
+  initial_net_capital_nominee Decimal? @map("initial_net_capital_nominee")
+  subnominee_share_of_ticket Decimal? @map("subnominee_share_of_ticket")
+  gross_capital_subnominee Decimal? @map("gross_capital_subnominee")
+  admin_fee             Decimal? @map("admin_fee")
+  createdAt             DateTime @map("createdAt")
+  updatedAt             DateTime @map("updatedAt")
+
+  // Relations
+  investor              Investor @relation(fields: [sub_nominee_investor_link], references: [id])
+  original_transaction  Transaction @relation(fields: [transaction], references: [id], onDelete: Cascade)
+
+  @@map("transactions_sub_nominees")
+}
+
+model TransactionAdvisory {
+  id                    Int      @id @default(autoincrement())
+  advisory_deal         String?  @map("advisory_deal")
+  deal_link             Int      @map("deal_link")
+  holding_entity        Int?
+  number_of_shares      Int?     @map("number_of_shares")
+  granted_share_price   Decimal? @map("granted_share_price")
+  advisory_cash_revenue Decimal? @map("advisory_cash_revenue")
+  createdAt             DateTime @map("createdAt")
+  updatedAt             DateTime @map("updatedAt")
+
+  // Relations
+  deal                  Deal     @relation(fields: [deal_link], references: [id], onDelete: Cascade)
+  holding_entity_company Company? @relation(fields: [holding_entity], references: [id])
+
+  @@map("transactions_advisory")
+}
+
+model Document {
+  id                    String   @id @default(uuid()) @map("id")
+  name                  String
+  type                  String?
+  url                   String?
+  description           String?
+  investor_id           Int?     @map("investor_id")
+  deal_id               Int?     @map("deal_id")
+  company_id            Int?     @map("company_id")
+  uploaded_at           DateTime @default(now()) @map("uploaded_at")
+  created_at            DateTime @default(now()) @map("created_at")
+  updated_at            DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  investor              Investor? @relation(fields: [investor_id], references: [id])
+  deal                  Deal?     @relation(fields: [deal_id], references: [id])
+  company               Company?  @relation(fields: [company_id], references: [id])
+
+  @@map("documents")
+}
+
+model InterestedInvestor {
+  id                    String   @id @default(uuid()) @map("id")
+  full_name             String   @map("full_name")
+  email                 String   @map("email")
+  phone_number          String?  @map("phone_number")
+  message               String?
+  status                String   @default("NEW") @map("status")
+  created_at            DateTime @default(now()) @map("created_at")
+  updated_at            DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("interested_investors")
+}
+
+model PortfolioAnalytics {
+  id                    Int      @id @default(autoincrement())
+  calculation_date      DateTime @default(now()) @map("calculation_date")
+  total_aum             Decimal  @default(0) @map("total_aum")
+  total_portfolio_value Decimal  @default(0) @map("total_portfolio_value")
+  active_deals_count    Int      @default(0) @map("active_deals_count")
+  total_investors_count Int      @default(0) @map("total_investors_count")
+  average_moic          Decimal  @default(0) @map("average_moic")
+  total_realized_gains  Decimal  @default(0) @map("total_realized_gains")
+  total_unrealized_gains Decimal @default(0) @map("total_unrealized_gains")
+  irr_portfolio         Decimal  @default(0) @map("irr_portfolio")
+  success_rate_percentage Decimal @default(0) @map("success_rate_percentage")
+  geographic_diversification_score Decimal @default(0) @map("geographic_diversification_score")
+  sector_diversification_score Decimal @default(0) @map("sector_diversification_score")
+  created_at            DateTime @default(now()) @map("created_at")
+  updated_at            DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("portfolio_analytics")
+}
+
+model DealsUnderlyingCompanies {
+  id                    Int      @id @default(autoincrement())
+  createdAt             DateTime @map("createdAt")
+  updatedAt             DateTime @map("updatedAt")
+  deal_id               Int?     @map("deal_id")
+  company_id            Int?     @map("company_id")
+
+  // Relations
+  deal                  Deal?    @relation(fields: [deal_id], references: [id], onDelete: Cascade)
+  company               Company? @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+  @@unique([deal_id, company_id])
+  @@map("deals_underlying_companies")
+} 

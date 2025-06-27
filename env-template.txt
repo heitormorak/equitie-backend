@@ -1,0 +1,21 @@
+# Supabase PostgreSQL Database Configuration
+DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
+
+# Alternative connection variables (if needed)
+DB_HOST=db.[YOUR-PROJECT-REF].supabase.co
+DB_PORT=5432
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASSWORD=[YOUR-PASSWORD]
+
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+
+# Server Configuration
+PORT=3000
+NODE_ENV=development
+
+# Supabase Configuration (if using Supabase client)
+SUPABASE_URL=https://[YOUR-PROJECT-REF].supabase.co
+SUPABASE_ANON_KEY=[YOUR-ANON-KEY]
+SUPABASE_SERVICE_ROLE_KEY=[YOUR-SERVICE-ROLE-KEY] 
