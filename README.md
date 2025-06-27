@@ -1,120 +1,89 @@
-# Equitie Backend
+# Equitie Backend API
 
-Backend API for the Equitie investment platform.
+A Node.js/Express backend API for investment portfolio management with Prisma ORM and PostgreSQL.
 
-## Setup
+## 🚀 Quick Start
 
-### 1. Environment Variables
+### Prerequisites
+- Node.js (v16+)
+- PostgreSQL
+- npm or yarn
 
-Copy the `env-template.txt` file to `.env` and fill in your Supabase credentials:
-
+### Installation
 ```bash
-cp env-template.txt .env
-```
+# Clone the repository
+git clone <repository-url>
+cd equitie-backend
 
-#### Required Environment Variables:
-
-**Supabase PostgreSQL Database:**
-- `DATABASE_URL`: Your Supabase PostgreSQL connection string
-- `DB_HOST`: Supabase database host
-- `DB_PORT`: Database port (usually 5432)
-- `DB_NAME`: Database name (usually 'postgres')
-- `DB_USER`: Database user (usually 'postgres')
-- `DB_PASSWORD`: Your database password
-
-**JWT Configuration:**
-- `JWT_SECRET`: Secret key for JWT token signing
-
-**Server Configuration:**
-- `PORT`: Server port (default: 3000)
-- `NODE_ENV`: Environment (development/production)
-
-**Optional Supabase Client:**
-- `SUPABASE_URL`: Your Supabase project URL
-- `SUPABASE_ANON_KEY`: Supabase anonymous key
-- `SUPABASE_SERVICE_ROLE_KEY`: Supabase service role key
-
-### 2. Getting Supabase Credentials
-
-1. Go to your Supabase project dashboard
-2. Navigate to Settings > Database
-3. Copy the connection string from "Connection string" section
-4. Replace `[YOUR-PASSWORD]` with your database password
-5. Replace `[YOUR-PROJECT-REF]` with your project reference
-
-### 3. Install Dependencies
-
-```bash
+# Install dependencies
 npm install
-```
 
-### 4. Database Setup
+# Set up environment variables
+cp env-template.txt .env
+# Edit .env with your database credentials
 
-```bash
 # Generate Prisma client
 npm run prisma:generate
-```
 
-**Note:** This project uses an existing Supabase database with real data. No seeding is required.
+# Run database migrations
+npm run prisma:migrate
 
-### 5. Run Development Server
-
-```bash
+# Start development server
 npm run dev
 ```
 
-## API Endpoints
+## 📋 API Endpoints
 
 ### Public Routes
 
-#### GET /public/stats
-Returns landing page statistics including portfolio metrics and recent deals.
+#### GET `/public/stats`
+Get landing page statistics and portfolio overview.
 
 **Response:**
 ```json
 {
   "portfolio": {
-    "totalAum": 215000,
-    "totalPortfolioValue": 387000,
-    "averageMoic": 1.8,
+    "totalAum": 15000000,
+    "totalPortfolioValue": 18500000,
+    "averageMoic": 2.3,
     "successRate": 85.5,
-    "totalRealizedGains": 0,
-    "totalUnrealizedGains": 172000
+    "totalRealizedGains": 2500000,
+    "totalUnrealizedGains": 1000000
   },
   "metrics": {
-    "totalInvestors": 3,
-    "totalDeals": 3,
-    "totalCompanies": 3,
-    "activeDeals": 3
+    "totalInvestors": 150,
+    "totalDeals": 25,
+    "totalCompanies": 18,
+    "activeDeals": 20
   },
   "recentDeals": [
     {
       "dealId": 1,
-      "dealName": "Figure.AI Series A",
-      "companyName": "Figure.AI",
+      "dealName": "Tech Startup Series A",
+      "companyName": "TechCorp",
       "sector": "Technology",
-      "dealDate": "2024-05-01T00:00:00.000Z",
-      "dealType": "SPV",
-      "entryValuation": 2000000000
+      "dealDate": "2024-01-15T00:00:00.000Z",
+      "dealType": "SERIES_A",
+      "entryValuation": 10000000
     }
   ],
   "performance": {
     "irrPortfolio": 0.25,
     "geographicDiversification": 0.8,
-    "sectorDiversification": 0.9
+    "sectorDiversification": 0.75
   }
 }
 ```
 
-#### POST /public/interested
+#### POST `/public/interested`
 Submit investor interest form.
 
 **Request Body:**
 ```json
 {
   "fullName": "John Doe",
-  "email": "john.doe@example.com",
-  "phoneNumber": "+1-555-0123",
+  "email": "john@example.com",
+  "phoneNumber": "+1234567890",
   "message": "Interested in investment opportunities"
 }
 ```
@@ -123,175 +92,344 @@ Submit investor interest form.
 ```json
 {
   "message": "Interest submitted successfully",
-  "id": "uuid-here",
+  "id": 1,
   "status": "NEW"
 }
 ```
 
 ### Investor Routes
 
-#### GET /investor/portfolio
-Returns the investor's portfolio overview including:
-- Current portfolio value and returns
-- List of investments with current values and MOIC
-- Company distribution
-- Industry distribution
-- Profit distribution by industry
-- Monthly returns
-
-**Headers:**
-```
-Authorization: Bearer <JWT_TOKEN>
-```
+#### GET `/investor/portfolio?investorId=2`
+Get detailed investor portfolio with all investments and metrics.
 
 **Response:**
 ```json
 {
   "portfolio": {
-    "currentValue": 1250000,
-    "totalReturnPercent": 225,
-    "moic": 3.6,
-    "firstInvestmentDate": "2021-04-12T00:00:00.000Z",
-    "totalInvested": 500000,
-    "capitalEarned": 750000
+    "currentValue": 3221669.93,
+    "totalReturnPercent": 104.21,
+    "moic": 2.04,
+    "firstInvestmentDate": "2020-05-01T00:00:00.000Z",
+    "totalInvested": 1577597.7,
+    "capitalEarned": 1644072.23
   },
   "investments": [
     {
-      "dealId": 1,
-      "companyName": "Figure.AI",
-      "currentValue": 98000,
-      "investedAmount": 25000,
-      "dealDate": "2024-05-01T00:00:00.000Z",
-      "moic": 1.4,
-      "dealType": "SPV",
-      "dealStatus": "ACTIVE"
+      "dealId": 11,
+      "dealName": "Multi-Company Fund",
+      "companyNames": "Company A, Company B, Company C",
+      "currentValue": 1500000,
+      "investedAmount": 750000,
+      "dealDate": "2021-03-15T00:00:00.000Z",
+      "moic": 2.0,
+      "dealType": "FUND",
+      "dealStatus": "ACTIVE",
+      "isMultipleCompanyDeal": true,
+      "companies": [
+        {
+          "companyName": "Company A",
+          "currentValue": 500000,
+          "investedAmount": 250000,
+          "moic": 2.0,
+          "entryValuation": 10000000,
+          "latestValuation": 20000000,
+          "latestValuationDate": "2024-01-15T00:00:00.000Z"
+        }
+      ]
     }
-  ],
-  "companyDistribution": [...],
-  "industryDistribution": [...],
-  "profitDistribution": [...],
-  "monthlyReturns": [...]
+  ]
 }
 ```
 
-#### GET /investor/investments/:dealId
-Returns detailed information about a specific investment.
+#### GET `/investor/portfolio/overview?investorId=2`
+Get portfolio summary (same data as portfolio but without detailed investments).
 
-**Headers:**
+**Response:**
+```json
+{
+  "currentValue": 3221669.93,
+  "totalReturnPercent": 104.21,
+  "moic": 2.04,
+  "firstInvestmentDate": "2020-05-01T00:00:00.000Z",
+  "totalInvested": 1577597.7,
+  "capitalEarned": 1644072.23
+}
 ```
-Authorization: Bearer <JWT_TOKEN>
-```
+
+#### GET `/investor/investments/:dealId?investorId=2`
+Get detailed information about a specific investment.
 
 **Response:**
 ```json
 {
   "investment": {
-    "dealId": 1,
-    "companyName": "Figure.AI",
-    "currentValue": 98000,
-    "investedAmount": 25000,
-    "dealDate": "2024-05-01T00:00:00.000Z",
-    "moic": 1.4,
-    "dealType": "SPV",
+    "dealId": 11,
+    "currentValue": 1500000,
+    "investedAmount": 750000,
+    "dealDate": "2021-03-15T00:00:00.000Z",
+    "moic": 2.0,
+    "dealType": "FUND",
     "dealStatus": "ACTIVE"
   },
-  "company": {
-    "entryValuation": 2000000000,
-    "latestValuation": 7700000000,
-    "sector": "Technology",
-    "description": "AI robotics company"
-  },
+  "companies": [
+    {
+      "companyName": "Company A",
+      "sector": "Technology",
+      "description": "AI-powered software company",
+      "entryValuation": 10000000,
+      "latestValuation": 20000000,
+      "currentValue": 500000,
+      "investedAmount": 250000,
+      "moic": 2.0
+    }
+  ],
   "deal": {
-    "fundVehicle": "SPV",
-    "spvName": "Equitie Soul LLC",
-    "partner": "Align",
-    "description": "Series A investment in Figure.AI"
+    "fundVehicle": "FUND",
+    "partner": "Investment Partner",
+    "description": "Multi-company investment fund",
+    "numberOfCompanies": 3,
+    "isSingleCompanyDeal": false
   },
   "fees": {
-    "managementFee": 250,
-    "performanceFee": 3750,
-    "totalFees": 4000
+    "managementFee": 15000,
+    "performanceFee": 75000,
+    "totalFees": 90000
   }
 }
 ```
 
-## Database Connection
+#### GET `/investor/portfolio/companies?investorId=2`
+Get company distribution across the portfolio.
 
-The project uses Prisma ORM to connect to Supabase PostgreSQL. The connection is configured in `prisma/schema.prisma` and provides type-safe database operations.
+**Response:**
+```json
+[
+  {
+    "companyName": "Company A",
+    "amount": 500000,
+    "percentage": 33.33
+  },
+  {
+    "companyName": "Company B",
+    "amount": 500000,
+    "percentage": 33.33
+  },
+  {
+    "companyName": "Company C",
+    "amount": 500000,
+    "percentage": 33.34
+  }
+]
+```
 
-**Note:** This project connects to an existing Supabase database with real investment data. The schema is based on the actual database structure.
+#### GET `/investor/portfolio/industries?investorId=2`
+Get industry/sector distribution across the portfolio.
 
-## Project Structure
+**Response:**
+```json
+[
+  {
+    "industry": "Technology",
+    "amount": 1000000,
+    "percentage": 66.67
+  },
+  {
+    "industry": "Healthcare",
+    "amount": 500000,
+    "percentage": 33.33
+  }
+]
+```
+
+#### GET `/investor/portfolio/monthly-returns?investorId=2`
+Get monthly returns based on actual valuations.
+
+**Response:**
+```json
+[
+  {
+    "month": "2021-03",
+    "invested": 750000,
+    "currentValue": 1500000,
+    "returnPercent": 100.0
+  },
+  {
+    "month": "2021-06",
+    "invested": 1000000,
+    "currentValue": 2200000,
+    "returnPercent": 120.0
+  }
+]
+```
+
+### Admin Routes
+
+#### GET `/admin/investors`
+List all investors (requires ADMIN authentication).
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "email": "investor@example.com",
+    "fullName": "John Investor",
+    "id_checked": true,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+]
+```
+
+#### POST `/admin/investors/:id/approve`
+Approve an investor (requires ADMIN authentication).
+
+**Response:**
+```json
+{
+  "message": "Investor approved successfully",
+  "investor": {
+    "id": 1,
+    "id_checked": true
+  }
+}
+```
+
+#### GET `/admin/deals`
+List all deals (requires ADMIN authentication).
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "deal_name": "Tech Startup Series A",
+    "deal_type": "SERIES_A",
+    "deal_status": "ACTIVE",
+    "deal_date": "2024-01-15T00:00:00.000Z",
+    "entry_valuation": 10000000,
+    "underlying_company": {
+      "id": 1,
+      "company_name": "TechCorp",
+      "company_sector": "Technology"
+    }
+  }
+]
+```
+
+#### PUT `/admin/valuations/:companyId`
+Update company valuations (requires ADMIN authentication).
+
+**Request Body:**
+```json
+{
+  "valuation_post_money": 20000000,
+  "valuation_pre_money": 15000000,
+  "investment_amount": 5000000,
+  "description": "Series A funding round"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Valuation updated successfully",
+  "valuation": {
+    "id": 1,
+    "company_id": 1,
+    "valuation_post_money": 20000000,
+    "valuation_pre_money": 15000000,
+    "investment_amount": 5000000,
+    "description": "Series A funding round",
+    "valuation_date": "2024-01-15T00:00:00.000Z"
+  }
+}
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+Create a `.env` file based on `env-template.txt`:
+
+```env
+DATABASE_URL="postgresql://username:password@localhost:5432/equitie_db"
+JWT_SECRET="your-secret-key"
+PORT=3000
+```
+
+### Database Setup
+```bash
+# Generate Prisma client
+npm run prisma:generate
+
+# Run migrations
+npm run prisma:migrate
+
+# Open Prisma Studio (optional)
+npm run prisma:studio
+```
+
+## 🏗️ Project Structure
 
 ```
 src/
-├── config/
-│   └── database.ts          # Database configuration (legacy)
-├── controllers/
-│   ├── investor.controller.ts # Investor API controllers
-│   └── public.controller.ts   # Public API controllers
-├── middleware/
-│   ├── auth.ts             # Authentication middleware
-│   └── roles.ts            # Role-based authorization
-├── routes/
-│   ├── investor.routes.ts  # Investor API routes
-│   ├── admin.routes.ts     # Admin API routes
-│   ├── auth.routes.ts      # Authentication routes
-│   └── public.routes.ts    # Public API routes
-├── services/
-│   └── database.service.ts # Database service utilities (legacy)
-├── types/
-│   └── express.d.ts        # Express type extensions
-└── index.ts               # Main application entry point
-
-prisma/
-└── schema.prisma          # Database schema
+├── controllers/          # Route handlers
+│   ├── admin.controller.ts
+│   ├── auth.controller.ts
+│   ├── investor.controller.ts
+│   └── public.controller.ts
+├── middleware/           # Authentication & authorization
+│   ├── auth.ts
+│   └── roles.ts
+├── routes/              # Route definitions
+│   ├── admin.routes.ts
+│   ├── auth.routes.ts
+│   ├── investor.routes.ts
+│   └── public.routes.ts
+├── services/            # Business logic
+│   └── database.service.ts
+├── types/               # TypeScript type definitions
+│   └── express.d.ts
+└── index.ts            # Application entry point
 ```
 
-## Features
+## 🚀 Scripts
 
-### Public Landing Page
-- Portfolio performance statistics
-- Recent deals showcase
-- Investor interest form submission
-- Success metrics and diversification scores
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run prisma:generate` - Generate Prisma client
+- `npm run prisma:migrate` - Run database migrations
+- `npm run prisma:studio` - Open Prisma Studio
 
-### Portfolio Management
-- Real-time portfolio value calculation
-- MOIC (Multiple on Invested Capital) tracking
-- Investment distribution analysis
-- Monthly return tracking
-- Industry and company diversification metrics
+## 🔐 Authentication
 
-### Investment Details
-- Detailed investment information
-- Company valuation history
-- Fee structure breakdown
-- Deal partner information
-- SPV and fund vehicle details
-
-### Security
-- JWT-based authentication
-- Role-based authorization
-- Secure database connections with SSL
-- Environment variable configuration
-
-## Development
-
-### Database Operations
-```bash
-# View database in Prisma Studio
-npm run prisma:studio
-
-# Generate Prisma client after schema changes
-npm run prisma:generate
-
-# Run migrations (if needed)
-npm run prisma:migrate
+Most routes require authentication via JWT token in the Authorization header:
+```
+Authorization: Bearer <your-jwt-token>
 ```
 
-### Building for Production
-```bash
-npm run build
-npm start
-``` 
+Admin routes require ADMIN role in addition to authentication.
+
+## 📊 Data Models
+
+The API uses Prisma with PostgreSQL and includes models for:
+- Investors
+- Deals
+- Companies
+- Valuations
+- Transactions
+- Portfolio Analytics
+- Interested Investors
+
+## 🛠️ Development
+
+### Adding New Routes
+1. Create controller function in appropriate controller file
+2. Add route definition in routes file
+3. Update this README with new endpoint documentation
+
+### Database Changes
+1. Update Prisma schema in `prisma/schema.prisma`
+2. Run `npm run prisma:migrate` to create migration
+3. Run `npm run prisma:generate` to update client 

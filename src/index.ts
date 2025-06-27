@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import * as dotenv from 'dotenv';
 import publicRoutes from './routes/public.routes';
 import investorRoutes from './routes/investor.routes';
@@ -8,6 +9,7 @@ import authRoutes from './routes/auth.routes';
 dotenv.config();
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 // Routes
