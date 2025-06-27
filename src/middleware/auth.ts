@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
 
-export const authenticate = (req: Request, res: Response, next: NextFunction) => {
+export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return res.status(401).json({ error: 'Authorization token is missing.' });
+    res.status(401).json({ error: 'Authorization token is missing.' });
+    return;
   }
 
   const token = authHeader.replace('Bearer ', '');
@@ -18,6 +19,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
     req.user = decoded;
     next();
   } catch (err) {
-    return res.status(401).json({ error: 'Invalid or expired token.' });
+    res.status(401).json({ error: 'Invalid or expired token.' });
+    return;
   }
 };

@@ -1,4 +1,4 @@
-import * as express from 'express';
+import express from 'express';
 import * as dotenv from 'dotenv';
 import publicRoutes from './routes/public.routes';
 import investorRoutes from './routes/investor.routes';

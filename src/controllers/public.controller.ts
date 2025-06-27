@@ -4,12 +4,12 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // Get landing page statistics
-export const getLandingStats = async (req: Request, res: Response) => {
+export const getLandingStats = async (req: Request, res: Response): Promise<void> => {
   try {
     // Get latest portfolio analytics
     const latestAnalytics = await prisma.portfolioAnalytics.findFirst({
       orderBy: {
-        calculationDate: 'desc',
+        calculation_date: 'desc',
       },
     });
 
@@ -19,14 +19,14 @@ export const getLandingStats = async (req: Request, res: Response) => {
     // Get total number of deals
     const totalDeals = await prisma.deal.count({
       where: {
-        dealStatus: 'ACTIVE',
+        deal_status: 'ACTIVE',
       },
     });
 
     // Get total number of companies
     const totalCompanies = await prisma.company.count({
       where: {
-        companyType: 'PORTFOLIO',
+        company_type: 'PORTFOLIO',
       },
     });
 
@@ -34,52 +34,52 @@ export const getLandingStats = async (req: Request, res: Response) => {
     const recentDeals = await prisma.deal.findMany({
       take: 5,
       orderBy: {
-        dealDate: 'desc',
+        deal_date: 'desc',
       },
       include: {
-        underlyingCompany: {
+        underlying_company: {
           select: {
-            companyName: true,
-            companySector: true,
+            company_name: true,
+            company_sector: true,
           },
         },
       },
       where: {
-        dealStatus: 'ACTIVE',
+        deal_status: 'ACTIVE',
       },
     });
 
     // Calculate success rate from analytics or default
-    const successRate = latestAnalytics?.successRatePercentage || 85.5;
+    const successRate = latestAnalytics?.success_rate_percentage || 85.5;
 
     res.json({
       portfolio: {
-        totalAum: latestAnalytics?.totalAum?.toNumber() || 0,
-        totalPortfolioValue: latestAnalytics?.totalPortfolioValue?.toNumber() || 0,
-        averageMoic: latestAnalytics?.averageMoic?.toNumber() || 0,
+        totalAum: latestAnalytics?.total_aum?.toNumber() || 0,
+        totalPortfolioValue: latestAnalytics?.total_portfolio_value?.toNumber() || 0,
+        averageMoic: latestAnalytics?.average_moic?.toNumber() || 0,
         successRate: successRate,
-        totalRealizedGains: latestAnalytics?.totalRealizedGains?.toNumber() || 0,
-        totalUnrealizedGains: latestAnalytics?.totalUnrealizedGains?.toNumber() || 0,
+        totalRealizedGains: latestAnalytics?.total_realized_gains?.toNumber() || 0,
+        totalUnrealizedGains: latestAnalytics?.total_unrealized_gains?.toNumber() || 0,
       },
       metrics: {
         totalInvestors,
         totalDeals,
         totalCompanies,
-        activeDeals: latestAnalytics?.activeDealsCount || 0,
+        activeDeals: latestAnalytics?.active_deals_count || 0,
       },
       recentDeals: recentDeals.map(deal => ({
-        dealId: deal.deal_id,
-        dealName: deal.dealName,
-        companyName: deal.underlyingCompany?.companyName || 'Unknown',
-        sector: deal.underlyingCompany?.companySector || 'Unknown',
-        dealDate: deal.dealDate,
-        dealType: deal.dealType,
-        entryValuation: deal.entryValuation?.toNumber() || 0,
+        dealId: deal.id,
+        dealName: deal.deal_name,
+        companyName: deal.underlying_company?.company_name || 'Unknown',
+        sector: deal.underlying_company?.company_sector || 'Unknown',
+        dealDate: deal.deal_date,
+        dealType: deal.deal_type,
+        entryValuation: deal.entry_valuation?.toNumber() || 0,
       })),
       performance: {
-        irrPortfolio: latestAnalytics?.irrPortfolio?.toNumber() || 0,
-        geographicDiversification: latestAnalytics?.geographicDiversificationScore?.toNumber() || 0,
-        sectorDiversification: latestAnalytics?.sectorDiversificationScore?.toNumber() || 0,
+        irrPortfolio: latestAnalytics?.irr_portfolio?.toNumber() || 0,
+        geographicDiversification: latestAnalytics?.geographic_diversification_score?.toNumber() || 0,
+        sectorDiversification: latestAnalytics?.sector_diversification_score?.toNumber() || 0,
       },
     });
   } catch (error) {
@@ -89,42 +89,45 @@ export const getLandingStats = async (req: Request, res: Response) => {
 };
 
 // Submit investor interest form
-export const submitInvestorInterest = async (req: Request, res: Response) => {
+export const submitInvestorInterest = async (req: Request, res: Response): Promise<void> => {
   try {
     const { fullName, email, phoneNumber, message } = req.body;
 
     // Validate required fields
     if (!fullName || !email) {
-      return res.status(400).json({ 
+      res.status(400).json({ 
         error: 'Full name and email are required' 
       });
+      return;
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ 
+      res.status(400).json({ 
         error: 'Invalid email format' 
       });
+      return;
     }
 
     // Check if email already exists
-    const existingInterest = await prisma.interestedInvestors.findFirst({
+    const existingInterest = await prisma.interestedInvestor.findFirst({
       where: { email },
     });
 
     if (existingInterest) {
-      return res.status(409).json({ 
+      res.status(409).json({ 
         error: 'Interest already submitted with this email' 
       });
+      return;
     }
 
     // Create new interested investor record
-    const interestedInvestor = await prisma.interestedInvestors.create({
+    const interestedInvestor = await prisma.interestedInvestor.create({
       data: {
-        fullName,
+        full_name: fullName,
         email,
-        phoneNumber: phoneNumber || null,
+        phone_number: phoneNumber || null,
         message: message || null,
         status: 'NEW',
       },

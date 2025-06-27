@@ -23,18 +23,18 @@ export const loginWithGoogle = async (req: Request, res: Response): Promise<void
     
     // Find or create investor
     let investor = await prisma.investor.findFirst({
-      where: { primaryEmail: email },
+      where: { primary_email: email },
     });
 
     if (!investor) {
       // Create new investor
       investor = await prisma.investor.create({
         data: {
-          fullName: fullName || 'Unknown',
-          primaryEmail: email,
-          investorType: 'INDIVIDUAL',
+          full_name: fullName || 'Unknown',
+          primary_email: email,
+          investor_type: 'INDIVIDUAL',
           nationality: 'Unknown',
-          countryOfResidence: 'Unknown',
+          country_of_residence: 'Unknown',
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -45,7 +45,7 @@ export const loginWithGoogle = async (req: Request, res: Response): Promise<void
     const token = jwt.sign(
       {
         id: investor.id,
-        email: investor.primaryEmail,
+        email: investor.primary_email,
         role: 'INVESTOR', // Default role for Google login
       },
       process.env.JWT_SECRET || 'secret',
@@ -58,10 +58,10 @@ export const loginWithGoogle = async (req: Request, res: Response): Promise<void
       token,
       user: {
         id: investor.id,
-        email: investor.primaryEmail,
-        fullName: investor.fullName,
+        email: investor.primary_email,
+        fullName: investor.full_name,
         role: 'INVESTOR',
-        investorType: investor.investorType,
+        investorType: investor.investor_type,
         isApproved: investor.id_checked,
       },
     });

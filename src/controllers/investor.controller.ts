@@ -22,7 +22,7 @@ async function calculateDealMetrics(transaction: any) {
     let totalDealInvestment = new Decimal(0);
     
     // Calculate total invested in the deal (sum of all investment_amount)
-    dealCompanyInvestments.forEach(dci => {
+    dealCompanyInvestments.forEach((dci: any) => {
       totalDealInvestment = totalDealInvestment.plus(dci.investment_amount);
     });
 
